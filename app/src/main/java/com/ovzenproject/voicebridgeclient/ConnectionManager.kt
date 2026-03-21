@@ -77,7 +77,7 @@ class ConnectionManager(
             webSocket = object : WebSocketClient(uri) {
                 override fun onOpen(handshakedata: ServerHandshake?) {
                     sendLog("WebSocket opened, waiting for auth challenge")
-                    reconnectAttempts = 0 // сброс попыток при успехе
+                    reconnectAttempts = 0
                     startPing()
                 }
 
@@ -86,7 +86,7 @@ class ConnectionManager(
                 }
 
                 override fun onMessage(bytes: ByteBuffer?) {
-                    // Игнорируем бинарные сообщения (это аудио)
+                    // Игнорируем бинарные сообщения (аудио)
                 }
 
                 override fun onClose(code: Int, reason: String?, remote: Boolean) {
@@ -94,7 +94,6 @@ class ConnectionManager(
                     authComplete = false
                     stopPing()
                     onDisconnected()
-                    // Автопереподключение, если не было явной команды на отключение
                     if (reconnectAttempts < maxReconnectAttempts) {
                         reconnectAttempts++
                         Handler(Looper.getMainLooper()).postDelayed({
@@ -102,13 +101,11 @@ class ConnectionManager(
                         }, reconnectDelay)
                     } else {
                         sendLog("Max reconnection attempts reached, giving up")
-                        // Не вызываем onError, просто логируем
                     }
                 }
 
                 override fun onError(ex: Exception?) {
                     sendLog("WebSocket error: ${ex?.message}")
-                    // Не вызываем onError сразу, дадим шанс на переподключение
                 }
             }
 
@@ -165,6 +162,7 @@ class ConnectionManager(
         }
     }
 
+    // Отправляем ping, ждём pong
     private fun startPing() {
         pingJob = scope.launch {
             while (isActive && webSocket?.isOpen == true) {
@@ -213,6 +211,7 @@ class ConnectionManager(
                     webSocket?.send(initMsg)
                     onConnected()
                 }
+                // ИСПРАВЛЕНИЕ: обрабатываем pong, вычисляем задержку
                 "pong" -> {
                     val serverTimestamp = json.getLong("timestamp")
                     val latency = System.currentTimeMillis() - serverTimestamp
@@ -334,7 +333,7 @@ class ConnectionManager(
     fun disconnect() {
         sendLog("Disconnect called")
         stopPing()
-        reconnectAttempts = maxReconnectAttempts // запретить авто-переподключение
+        reconnectAttempts = maxReconnectAttempts
         try {
             webSocket?.close()
         } catch (e: Exception) {

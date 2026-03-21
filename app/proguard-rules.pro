@@ -19,3 +19,16 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Сохраняем сигнатуры дженериков для Gson TypeToken
+-keepattributes Signature
+
+# Сохраняем класс TypeToken и его наследников
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Сохраняем все модели данных (если они в пакете models)
+-keep class com.ovzenproject.voicebridgeclient.models.** { *; }
+
+# Сохраняем WebSocket классы
+-keep class org.java_websocket.** { *; }
