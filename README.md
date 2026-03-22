@@ -73,3 +73,10 @@ Android-клиент для передачи микрофонного аудио
 1. Откройте проект в Android Studio (Meerkat или новее).
 2. Синхронизируйте зависимости (Gradle).
 3. Соберите APK через `Build > Build Bundle(s) / APK(s) > Build APK(s)`.
+
+## 📦 Репозитории
+
+| Компонент | Ссылка |
+|-----------|--------|
+| 📱 Android-клиент | [VoiceBridge-Client](https://github.com/ovzen/VoiceBridge-Client) |
+| 💻 Сервер | [VoiceBridge-Server](https://github.com/ovzen/VoiceBridge-Server) |
